@@ -28,4 +28,21 @@ const createProject = async (req, res) =>{
     }
 }
 
-module.exports = createProject;
+const getAllProjects = async (req, res) =>{
+    const userId = req.userId;
+    try{
+        const projects = await Project.find({user:userId});
+        if(!projects || projects.length === 0){
+            return res.status(404).json({message:'No projects found'});
+        }
+        return res.status(200).json({
+            message:'Projects fetched successfully',
+            projects
+        })
+    }
+    catch (error) {
+        return res.status(500).json({message:error.message})
+    }
+}
+
+module.exports = {createProject, getAllProjects};
