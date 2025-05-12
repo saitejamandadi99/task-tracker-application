@@ -1,0 +1,22 @@
+.register-wrapper {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    padding: 2rem;
+  }
+  
+  .register-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 400px;
+    width: 100%;
+  }
+  
+  .register-title {
+    font-weight: 600;
+    color: #333;
+  }
+  
