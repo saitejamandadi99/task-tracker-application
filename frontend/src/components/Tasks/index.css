@@ -1,0 +1,96 @@
+
+
+/* General Layout for Tasks Page */
+.container {
+    max-width: 1200px;
+    margin-top: 2rem;
+  }
+  
+  /* Message Container */
+  .alert {
+    margin-top: 1rem;
+    font-size: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.25rem;
+  }
+  
+  /* Cards Layout */
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .col-md-4 {
+    margin-bottom: 1.5rem;
+  }
+  
+  h3 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .card {
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card h5 {
+    font-size: 1.25rem;
+    color: #333;
+  }
+  
+  .card p {
+    font-size: 1rem;
+    color: #666;
+  }
+  
+  .card .btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+  }
+  
+  .card .btn-sm {
+    padding: 0.5rem;
+  }
+  
+  /* Hover effect for Task Cards */
+  .card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card .btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+  }
+  
+  .card .btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+  }
+  
+  .card .btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+  }
+  
+  .card .btn-sm:hover {
+    background-color: #f0f0f0;
+  }
+  
+  /* Card Details Section */
+  .card .border-top {
+    margin-top: 1rem;
+  }
+  
+  .card .border-top p {
+    color: #555;
+  }
+  
+  .card .border-top h6 {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  

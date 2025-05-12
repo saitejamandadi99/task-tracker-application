@@ -1,0 +1,100 @@
+
+
+/* Task Card Container */
+.card {
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  /* Task Card Title */
+  .card h5 {
+    font-size: 1.25rem;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Task Card Status */
+  .card p {
+    font-size: 1rem;
+    color: #777;
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Action Buttons */
+  .card .btn {
+    font-size: 1rem;
+  }
+  
+  .card .btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+  }
+  
+  .card .btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+  }
+  
+  .card .btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+  }
+  
+  .card .btn-sm {
+    padding: 0.5rem;
+  }
+  
+  .card .d-flex {
+    justify-content: space-between;
+    margin-top: 0.5rem;
+  }
+  
+  /* Hover effect for TaskCard */
+  .card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  }
+  
+  /* Task Details Section */
+  .card .border-top {
+    padding-top: 1rem;
+    border-top: 1px solid #f1f1f1;
+  }
+  
+  .card .border-top h6 {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .card .border-top p {
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  .card .alert {
+    margin-top: 1rem;
+    font-size: 1rem;
+  }
+  
+/* Make icon buttons more consistent and visible */
+.card button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px; /* space between icon and text */
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  
+  /* Hover effects */
+  .card button:hover {
+    opacity: 0.9;
+  }
+  
+  /* Optional: icon sizing */
+  .card svg {
+    font-size: 14px;
+  }
+  

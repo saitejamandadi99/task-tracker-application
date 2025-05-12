@@ -1,8 +1,9 @@
 const Project = require('../models/project');
 
 const createProject = async (req, res) =>{
+    console.log('createProject → req.user:', req.user);
     try {
-        const userId = req.userId;
+        const userId = req.user._id;
         const {title, description, dueDate, status} = req.body;
         const projectCount = await Project.countDocuments({user:userId});
         if(projectCount >=4){return res.status(400).json({message:'You have reached the maximum number of projects allowed'})}
@@ -10,7 +11,7 @@ const createProject = async (req, res) =>{
             title, description, user:userId,status, dueDate
         })
         await newProject.save();
-        res.status(201).json({
+        return res.status(201).json({
             message:'Project created successfully',
             project:{
                 id:newProject._id,
@@ -29,7 +30,7 @@ const createProject = async (req, res) =>{
 }
 
 const getAllProjects = async (req, res) =>{
-    const userId = req.userId;
+    const userId = req.user._id;
     try{
         const projects = await Project.find({user:userId});
         if(!projects || projects.length === 0){

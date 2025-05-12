@@ -1,0 +1,39 @@
+.container {
+    max-width: 600px;
+    margin: auto;
+  }
+  
+  .card {
+    border-radius: 15px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card h2 {
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .form-control {
+    border-radius: 8px;
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+  
+  .btn-success {
+    border-radius: 8px;
+    font-size: 1rem;
+    padding: 0.75rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .btn-success:hover {
+    background-color: #218838;
+  }
+  
+  .alert {
+    border-radius: 8px;
+    font-size: 0.95rem;
+    text-align: center;
+  }
+  
