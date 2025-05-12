@@ -28,4 +28,4 @@ const createProject = async (req, res) =>{
     }
 }
 
-module.exports = {createProject};
+module.exports = createProject;
