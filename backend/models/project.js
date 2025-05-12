@@ -11,7 +11,7 @@ const projectSchema = new mongoose.Schema({
         trim: true,
     },
     user:{
-        type:Schema.Types.ObjectId,
+        type:mongoose.Schema.Types.ObjectId,
         ref : 'User',
         required:true,
     },
