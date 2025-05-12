@@ -29,6 +29,9 @@ app.get('/', (req, res)=>{
     res.send('Task Tracker API is running in the background');
 })
 
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/projects', require('./routes/projectRoutes'));
+
 app.listen(port, ()=>{
     console.log(`server is running on port ${port}`);
     console.log(`http://localhost:${port}`);
