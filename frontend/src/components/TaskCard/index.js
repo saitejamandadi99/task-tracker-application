@@ -14,14 +14,14 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
   const [details, setDetails] = useState(null);
   const [showEdit, setShowEdit] = useState(false);
   const [editApiStatus, setEditApiStatus] = useState(apiStatusConstants.INITIAL);
-  const [viewApiStatus, setViewApiStatus] = useState(apiStatusConstants.INITIAL); // Added for viewing details
+  const [viewApiStatus, setViewApiStatus] = useState(apiStatusConstants.INITIAL);
   const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
   const token = localStorage.getItem('token');
   const iconSize = isMobile ? 16 : 20;
 
   const handleView = async (e) => {
     e.stopPropagation();
-    if (details) {
+    if (details !== null) {
       setDetails(null);
       return;
     }
@@ -34,7 +34,7 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
       setViewApiStatus(apiStatusConstants.SUCCESS);
     } catch (err) {
       console.error('Error fetching task details:', err);
-      setViewApiStatus(apiStatusConstants.INITIAL); // Changed to INITIAL
+      setViewApiStatus(apiStatusConstants.INITIAL);
     }
   };
 
@@ -56,7 +56,7 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
       onUpdate();
     } catch (err) {
       console.error('Error updating task:', err);
-      setEditApiStatus(apiStatusConstants.INITIAL); // Changed to INITIAL
+      setEditApiStatus(apiStatusConstants.INITIAL);
     }
   };
 
@@ -71,6 +71,9 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
       case apiStatusConstants.IN_PROGRESS:
         return <Loader />;
       case apiStatusConstants.SUCCESS:
+        if (!details) {
+          return null; //  Hide details view when details is null
+        }
         return (
           <div className="mt-3 border-top pt-2">
             <p>
@@ -80,7 +83,7 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
               <strong>Created:</strong> {new Date(details.createdAt).toLocaleDateString()}
             </p>
             <p>
-              <strong>Completed:</strong>{' '}
+              <strong>Completed:</strong>
               {details.completedAt ? new Date(details.completedAt).toLocaleDateString() : 'N/A'}
             </p>
           </div>
