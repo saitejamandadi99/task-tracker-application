@@ -1,4 +1,3 @@
-// frontend/src/components/Tasks.js
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import TaskCard from '../TaskCard';
@@ -7,13 +6,13 @@ import { FaPlus } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import Loader from '../Loader'; // Assuming you have a Loader component
-import Failure from '../Failure'; // Assuming you have a Failure component
+// import Failure from '../Failure'; // Assuming you have a Failure component -  Not used
 
 const apiStatusConstants = {
   INITIAL: 'INITIAL',
   IN_PROGRESS: 'IN_PROGRESS',
   SUCCESS: 'SUCCESS',
-  FAILURE: 'FAILURE',
+  // FAILURE: 'FAILURE', // Removed FAILURE
 };
 
 const Tasks = () => {
@@ -34,7 +33,8 @@ const Tasks = () => {
       setFetchStatus(apiStatusConstants.SUCCESS);
     } catch (error) {
       console.error('Failed to fetch tasks:', error);
-      setFetchStatus(apiStatusConstants.FAILURE);
+      setFetchStatus(apiStatusConstants.INITIAL); // Changed from FAILURE to INITIAL
+      // Consider showing a user-friendly message here, but not via a separate component.
     }
   }, [projectId]);
 
@@ -49,11 +49,11 @@ const Tasks = () => {
       await axios.delete(`http://localhost:5000/api/tasks/${taskId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setTasks(tasks.filter(task => task._id !== taskId));
+      setTasks(tasks.filter((task) => task._id !== taskId));
       setDeleteStatus(apiStatusConstants.SUCCESS);
     } catch (error) {
       console.error('Delete failed:', error);
-      setDeleteStatus(apiStatusConstants.FAILURE);
+      setDeleteStatus(apiStatusConstants.INITIAL); // Changed from FAILURE to INITIAL
     } finally {
       // Reset delete status after a short delay
       setTimeout(() => {
@@ -70,12 +70,10 @@ const Tasks = () => {
     switch (fetchStatus) {
       case apiStatusConstants.IN_PROGRESS:
         return <Loader />;
-      case apiStatusConstants.FAILURE:
-        return <Failure message="Failed to load tasks." />;
       case apiStatusConstants.SUCCESS:
         return (
           <div className="row">
-            {tasks.map(task => (
+            {tasks.map((task) => (
               <div className="col-md-4 mb-3" key={task._id}>
                 <TaskCard
                   task={task}
@@ -84,11 +82,13 @@ const Tasks = () => {
                 />
               </div>
             ))}
-            {tasks.length === 0 && <p className="text-muted">No tasks found for this project.</p>}
+            {tasks.length === 0 && (
+              <p className="text-muted">No tasks found for this project.</p>
+            )}
           </div>
         );
       default:
-        return null;
+        return <p className="text-muted">Failed to load tasks.</p>; //Simplified.  The Failure component is not used
     }
   };
 
@@ -96,8 +96,6 @@ const Tasks = () => {
     switch (deleteStatus) {
       case apiStatusConstants.IN_PROGRESS:
         return <div className="alert alert-info">Deleting task...</div>;
-      case apiStatusConstants.FAILURE:
-        return <div className="alert alert-danger">Failed to delete task.</div>;
       case apiStatusConstants.SUCCESS:
         return <div className="alert alert-success">Task deleted successfully.</div>;
       default:

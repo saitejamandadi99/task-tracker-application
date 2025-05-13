@@ -4,20 +4,19 @@ import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import TaskCard from '../TaskCard';
 import './index.css';
-import Loader from '../Loader';      
-import Failure from '../Failure';   
+import Loader from '../Loader';
+
 const apiStatusConstants = {
   INITIAL: 'INITIAL',
   IN_PROGRESS: 'IN_PROGRESS',
   SUCCESS: 'SUCCESS',
-  FAILURE: 'FAILURE',
 };
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [expandedProjectId, setExpandedProjectId] = useState(null);
   const [tasks, setTasks] = useState([]);
-  const [projectApiStatus, setProjectApiStatus] = useState(apiStatusConstants.INITIAL); // Renamed
+  const [projectApiStatus, setProjectApiStatus] = useState(apiStatusConstants.INITIAL);
   const [taskLoading, setTaskLoading] = useState(false);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
@@ -25,15 +24,15 @@ const Projects = () => {
   useEffect(() => {
     if (!token) return navigate('/');
     const fetchProjects = async () => {
-      setProjectApiStatus(apiStatusConstants.IN_PROGRESS); // Use setProjectApiStatus
+      setProjectApiStatus(apiStatusConstants.IN_PROGRESS);
       try {
         const res = await axios.get('http://localhost:5000/api/projects', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setProjects(res.data.projects);
-        setProjectApiStatus(apiStatusConstants.SUCCESS); // Use setProjectApiStatus
+        setProjectApiStatus(apiStatusConstants.SUCCESS);
       } catch (err) {
-        setProjectApiStatus(apiStatusConstants.FAILURE); // Use setProjectApiStatus
+        setProjectApiStatus(apiStatusConstants.INITIAL);
       }
     };
     fetchProjects();
@@ -46,7 +45,8 @@ const Projects = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTasks(res.data.tasks);
-    } catch {
+    } catch (error) {
+      console.error("Error fetching tasks:", error); // Log the error
       setTasks([]);
     } finally {
       setTaskLoading(false);
@@ -63,10 +63,14 @@ const Projects = () => {
   };
 
   const handleDeleteTask = async (taskId) => {
-    await axios.delete(`http://localhost:5000/api/tasks/${taskId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setTasks(tasks.filter((t) => t._id !== taskId));
+    try {
+      await axios.delete(`http://localhost:5000/api/tasks/${taskId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setTasks(tasks.filter((t) => t._id !== taskId));
+    } catch (error) {
+      console.error("Error deleting task:", error); // Log the error.  Important for debugging
+    }
   };
 
   const handleDeleteProject = async (e, projectId) => {
@@ -78,21 +82,19 @@ const Projects = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProjects(projects.filter((p) => p._id !== projectId));
-      if (expandedProjectId === projectId) { // Collapse project details if deleted
+      if (expandedProjectId === projectId) {
         setExpandedProjectId(null);
         setTasks([]);
       }
     } catch (error) {
-      console.error('Failed to delete project:', error);
+      console.error('Failed to delete project:', error); // Log the error
     }
   };
 
   const renderProjectsView = () => {
-    switch (projectApiStatus) { // Use projectApiStatus
+    switch (projectApiStatus) {
       case apiStatusConstants.IN_PROGRESS:
         return <Loader />;
-      case apiStatusConstants.FAILURE:
-        return <Failure />;
       case apiStatusConstants.SUCCESS:
         return (
           <div className="project-grid">
@@ -106,21 +108,25 @@ const Projects = () => {
                     title="Delete Project"
                   />
                 </div>
-                <p className="mb-1"><strong>Status:</strong> {project.status}</p>
-                <p className="mb-2"><strong>Due:</strong> {project.dueDate ? new Date(project.dueDate).toLocaleDateString() : 'N/A'}</p>
+                <p className="mb-1">
+                  <strong>Status:</strong> {project.status}
+                </p>
+                <p className="mb-2">
+                  <strong>Due:</strong> {project.dueDate ? new Date(project.dueDate).toLocaleDateString() : 'N/A'}
+                </p>
 
                 {expandedProjectId === project._id && (
                   <div className="task-list">
                     <h6 className="fw-semibold">Tasks:</h6>
                     {taskLoading ? (
                       <Loader />
-                    ) : tasks.length ? (
+                    ) : tasks.length > 0 ? (
                       tasks.map((task) => (
                         <TaskCard
                           key={task._id}
                           task={task}
                           onDelete={handleDeleteTask}
-                          onUpdate={() => fetchTasks(project._id)} // Refresh tasks after update
+                          onUpdate={() => fetchTasks(project._id)}
                         />
                       ))
                     ) : (

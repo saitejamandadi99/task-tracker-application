@@ -4,14 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { FaPlusCircle } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
-import Loader from '../Loader'; // assuming Loader is in src/components/Loader.js
-import Failure from '../Failure'; // assuming Failure is in src/components/Failure.js
+import Loader from '../Loader';
 
 const apiStatusConstants = {
   INITIAL: 'INITIAL',
   IN_PROGRESS: 'IN_PROGRESS',
   SUCCESS: 'SUCCESS',
-  FAILURE: 'FAILURE',
 };
 
 const CreateProject = () => {
@@ -46,7 +44,7 @@ const CreateProject = () => {
       setTimeout(() => navigate('/projects'), 1500);
     } catch (error) {
       setMessage(error.response?.data?.message || 'Failed to create project');
-      setApiStatus(apiStatusConstants.FAILURE);
+      setApiStatus(apiStatusConstants.INITIAL);
     }
   };
 
@@ -54,8 +52,6 @@ const CreateProject = () => {
     switch (apiStatus) {
       case apiStatusConstants.IN_PROGRESS:
         return <Loader />;
-      case apiStatusConstants.FAILURE:
-        return <Failure onRetry={() => setApiStatus(apiStatusConstants.INITIAL)} />;
       default:
         return (
           <div className="card shadow p-4">
@@ -101,7 +97,6 @@ const CreateProject = () => {
               >
                 Create Project
               </button>
-
             </form>
             {message && <div className="alert alert-info mt-3">{message}</div>}
           </div>

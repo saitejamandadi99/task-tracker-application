@@ -2,14 +2,12 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { FaEye, FaEdit, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
 import { useMediaQuery } from 'react-responsive';
-import Loader from '../Loader';      
-import Failure from '../Failure';    
+import Loader from '../Loader';
 
 const apiStatusConstants = {
   INITIAL: 'INITIAL',
   IN_PROGRESS: 'IN_PROGRESS',
   SUCCESS: 'SUCCESS',
-  FAILURE: 'FAILURE',
 };
 
 const TaskCard = ({ task, onDelete, onUpdate }) => {
@@ -27,16 +25,16 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
       setDetails(null);
       return;
     }
-    setViewApiStatus(apiStatusConstants.IN_PROGRESS); // Set status for view
+    setViewApiStatus(apiStatusConstants.IN_PROGRESS);
     try {
       const res = await axios.get(`http://localhost:5000/api/tasks/${task._id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       setDetails(res.data.task);
       setViewApiStatus(apiStatusConstants.SUCCESS);
     } catch (err) {
       console.error('Error fetching task details:', err);
-      setViewApiStatus(apiStatusConstants.FAILURE);
+      setViewApiStatus(apiStatusConstants.INITIAL); // Changed to INITIAL
     }
   };
 
@@ -50,7 +48,7 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
     };
     try {
       await axios.put(`http://localhost:5000/api/tasks/${task._id}`, updatedTask, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       setEditApiStatus(apiStatusConstants.SUCCESS);
       setShowEdit(false);
@@ -58,28 +56,33 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
       onUpdate();
     } catch (err) {
       console.error('Error updating task:', err);
-      setEditApiStatus(apiStatusConstants.FAILURE);
+      setEditApiStatus(apiStatusConstants.INITIAL); // Changed to INITIAL
     }
   };
 
   const toggleEdit = (e) => {
     e.stopPropagation();
-    setShowEdit(prev => !prev);
-    setEditApiStatus(apiStatusConstants.INITIAL); // Reset edit status
+    setShowEdit((prev) => !prev);
+    setEditApiStatus(apiStatusConstants.INITIAL);
   };
 
   const renderDetailsView = () => {
     switch (viewApiStatus) {
       case apiStatusConstants.IN_PROGRESS:
         return <Loader />;
-      case apiStatusConstants.FAILURE:
-        return <Failure />;
       case apiStatusConstants.SUCCESS:
         return (
           <div className="mt-3 border-top pt-2">
-            <p><strong>Description:</strong> {details.description || 'N/A'}</p>
-            <p><strong>Created:</strong> {new Date(details.createdAt).toLocaleDateString()}</p>
-            <p><strong>Completed:</strong> {details.completedAt ? new Date(details.completedAt).toLocaleDateString() : 'N/A'}</p>
+            <p>
+              <strong>Description:</strong> {details.description || 'N/A'}
+            </p>
+            <p>
+              <strong>Created:</strong> {new Date(details.createdAt).toLocaleDateString()}
+            </p>
+            <p>
+              <strong>Completed:</strong>{' '}
+              {details.completedAt ? new Date(details.completedAt).toLocaleDateString() : 'N/A'}
+            </p>
           </div>
         );
       default:
@@ -87,14 +90,12 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
     }
   };
 
-    const renderEditView = () => {
+  const renderEditView = () => {
     switch (editApiStatus) {
       case apiStatusConstants.IN_PROGRESS:
         return <Loader />;
-      case apiStatusConstants.FAILURE:
-        return <Failure />;
       case apiStatusConstants.SUCCESS:
-        return null; // No need to display anything, form is already displayed
+        return null;
       default:
         return (
           <form className="mt-3" onSubmit={handleEditSubmit}>
@@ -139,10 +140,12 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
   };
 
   return (
-    <div className="card mb-3" onClick={e => e.stopPropagation()}>
+    <div className="card mb-3" onClick={(e) => e.stopPropagation()}>
       <div className="card-body">
         <h5 className="card-title">{task.title}</h5>
-        <p className="card-text"><strong>Status:</strong> {task.status}</p>
+        <p className="card-text">
+          <strong>Status:</strong> {task.status}
+        </p>
 
         <div className="d-flex justify-content-start align-items-center gap-3 mb-2 flex-wrap">
           <FaEye
@@ -170,7 +173,6 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
 
         {renderDetailsView()}
         {showEdit && renderEditView()}
-
       </div>
     </div>
   );

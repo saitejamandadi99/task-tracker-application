@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaSignInAlt } from 'react-icons/fa';
 import Loader from '../Loader';
-import Failure from '../Failure';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 
@@ -11,7 +10,6 @@ const apiStatusConstants = {
   INITIAL: 'INITIAL',
   IN_PROGRESS: 'IN_PROGRESS',
   SUCCESS: 'SUCCESS',
-  FAILURE: 'FAILURE',
 };
 
 const Login = () => {
@@ -38,11 +36,11 @@ const Login = () => {
         navigate('/projects');
       } else {
         setMessage('Token not received. Login failed.');
-        setApiStatus(apiStatusConstants.FAILURE);
+        setApiStatus(apiStatusConstants.INITIAL); // Changed to INITIAL
       }
     } catch (error) {
       setMessage(error.response?.data?.message || 'Login failed');
-      setApiStatus(apiStatusConstants.FAILURE);
+      setApiStatus(apiStatusConstants.INITIAL); // Changed to INITIAL
     }
   };
 
@@ -50,8 +48,8 @@ const Login = () => {
     switch (apiStatus) {
       case apiStatusConstants.IN_PROGRESS:
         return <Loader />;
-      case apiStatusConstants.FAILURE:
-        return <Failure />;
+      case apiStatusConstants.SUCCESS:
+        return null;
       default:
         return (
           <>

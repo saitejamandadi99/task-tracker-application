@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaUserPlus, FaCheckCircle } from 'react-icons/fa';
 import Loader from '../Loader';
-import Failure from '../Failure';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 
@@ -11,7 +10,6 @@ const apiStatusConstants = {
   INITIAL: 'INITIAL',
   IN_PROGRESS: 'IN_PROGRESS',
   SUCCESS: 'SUCCESS',
-  FAILURE: 'FAILURE',
 };
 
 const Register = () => {
@@ -43,7 +41,7 @@ const Register = () => {
     } catch (error) {
       setSuccess(false);
       setMessage(error.response?.data?.message || 'Registration failed');
-      setApiStatus(apiStatusConstants.FAILURE);
+      setApiStatus(apiStatusConstants.INITIAL);
     }
   };
 
@@ -51,8 +49,8 @@ const Register = () => {
     switch (apiStatus) {
       case apiStatusConstants.IN_PROGRESS:
         return <Loader />;
-      case apiStatusConstants.FAILURE:
-        return <Failure />;
+      case apiStatusConstants.SUCCESS:
+        return null;
       default:
         return (
           <>

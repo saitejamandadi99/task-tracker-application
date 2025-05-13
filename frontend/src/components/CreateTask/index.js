@@ -2,13 +2,11 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Loader from '../Loader';
-import Failure from '../Failure';
 
 const apiStatusConstants = {
   INITIAL: 'INITIAL',
   IN_PROGRESS: 'IN_PROGRESS',
   SUCCESS: 'SUCCESS',
-  FAILURE: 'FAILURE',
 };
 
 const CreateTask = () => {
@@ -41,7 +39,7 @@ const CreateTask = () => {
       setApiStatus(apiStatusConstants.SUCCESS);
       navigate('/projects');
     } catch (error) {
-      setApiStatus(apiStatusConstants.FAILURE);
+      setApiStatus(apiStatusConstants.INITIAL);
       console.error('Error creating task:', error.response?.data?.message || error.message);
     }
   };
@@ -50,8 +48,6 @@ const CreateTask = () => {
     switch (apiStatus) {
       case apiStatusConstants.IN_PROGRESS:
         return <Loader />;
-      case apiStatusConstants.FAILURE:
-        return <Failure />;
       default:
         return (
           <form onSubmit={handleSubmit}>
