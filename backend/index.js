@@ -11,7 +11,7 @@ const MONGO_URI = process.env.MONGO_URI;
 
 app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:3000',  
+    origin: 'https://task-tracker-application-snowy.vercel.app',  
     credentials: true,
   }));
   
