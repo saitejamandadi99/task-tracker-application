@@ -13,6 +13,7 @@ const apiStatusConstants = {
 };
 
 const CreateProject = () => {
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -30,12 +31,13 @@ const CreateProject = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
     const token = localStorage.getItem('token');
     setApiStatus(apiStatusConstants.IN_PROGRESS);
 
     try {
       const res = await axios.post(
-        'http://localhost:5000/api/projects/create',
+        `${API_BASE_URL}/api/projects/create`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -13,6 +13,7 @@ const apiStatusConstants = {
 };
 
 const Login = () => {
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [message, setMessage] = useState('');
   const [apiStatus, setApiStatus] = useState(apiStatusConstants.INITIAL);
@@ -26,7 +27,7 @@ const Login = () => {
     setApiStatus(apiStatusConstants.IN_PROGRESS);
 
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', formData);
+      const res = await axios.post(`${API_BASE_URL}/api/auth/login`, formData);
       const token = res.data.user.token;
 
       if (token) {

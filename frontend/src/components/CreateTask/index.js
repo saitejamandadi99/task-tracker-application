@@ -10,6 +10,7 @@ const apiStatusConstants = {
 };
 
 const CreateTask = () => {
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const { projectId } = useParams();
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
@@ -32,7 +33,7 @@ const CreateTask = () => {
 
     try {
       await axios.post(
-        'http://localhost:5000/api/tasks',
+        `${API_BASE_URL}/api/tasks`,
         { ...task, projectId },
         { headers: { Authorization: `Bearer ${token}` } }
       );

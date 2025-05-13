@@ -13,6 +13,7 @@ const apiStatusConstants = {
 };
 
 const Register = () => {
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -32,7 +33,7 @@ const Register = () => {
     setApiStatus(apiStatusConstants.IN_PROGRESS);
 
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/register', formData);
+      const res = await axios.post(`${API_BASE_URL}/api/auth/register`, formData);
       setMessage(res.data.message);
       setSuccess(true);
       setApiStatus(apiStatusConstants.SUCCESS);

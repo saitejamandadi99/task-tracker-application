@@ -5,57 +5,54 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FaPlus } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
-import Loader from '../Loader'; 
-// import Failure from '../Failure'; // Assuming you have a Failure component -  Not used
+import Loader from '../Loader';
 
 const apiStatusConstants = {
   INITIAL: 'INITIAL',
   IN_PROGRESS: 'IN_PROGRESS',
   SUCCESS: 'SUCCESS',
-  // FAILURE: 'FAILURE', // Removed FAILURE
 };
 
 const Tasks = () => {
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const { projectId } = useParams();
   const [tasks, setTasks] = useState([]);
   const [fetchStatus, setFetchStatus] = useState(apiStatusConstants.INITIAL);
   const [deleteStatus, setDeleteStatus] = useState(apiStatusConstants.INITIAL);
   const navigate = useNavigate();
 
-  const fetchTasks = useCallback(async () => {
+  const fetchTasks = useCallback(async (projectId) => {
     setFetchStatus(apiStatusConstants.IN_PROGRESS);
     const token = localStorage.getItem('token');
     try {
-      const res = await axios.get(`http://localhost:5000/api/tasks/project/${projectId}`, {
+      const res = await axios.get(`${API_BASE_URL}/api/tasks/project/${projectId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTasks(res.data.tasks);
       setFetchStatus(apiStatusConstants.SUCCESS);
     } catch (error) {
       console.error('Failed to fetch tasks:', error);
-      setFetchStatus(apiStatusConstants.INITIAL); // Changed from FAILURE to INITIAL
-      // Consider showing a user-friendly message here, but not via a separate component.
+      setFetchStatus(apiStatusConstants.INITIAL);
     }
-  }, [projectId]);
+  }, [API_BASE_URL]); // Added API_BASE_URL as a dependency
 
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+    fetchTasks(projectId);
+  }, [fetchTasks, projectId]); // fetchTasks is already useCallback, and projectId
 
   const handleDeleteTask = async (taskId) => {
     setDeleteStatus(apiStatusConstants.IN_PROGRESS);
     const token = localStorage.getItem('token');
     try {
-      await axios.delete(`http://localhost:5000/api/tasks/${taskId}`, {
+      await axios.delete(`${API_BASE_URL}/api/tasks/${taskId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTasks(tasks.filter((task) => task._id !== taskId));
       setDeleteStatus(apiStatusConstants.SUCCESS);
     } catch (error) {
       console.error('Delete failed:', error);
-      setDeleteStatus(apiStatusConstants.INITIAL); // Changed from FAILURE to INITIAL
+      setDeleteStatus(apiStatusConstants.INITIAL);
     } finally {
-      // Reset delete status after a short delay
       setTimeout(() => {
         setDeleteStatus(apiStatusConstants.INITIAL);
       }, 1500);
@@ -78,7 +75,7 @@ const Tasks = () => {
                 <TaskCard
                   task={task}
                   onDelete={handleDeleteTask}
-                  onUpdate={fetchTasks}
+                  onUpdate={() => fetchTasks(projectId)} // Pass projectId to fetchTasks
                 />
               </div>
             ))}
@@ -88,7 +85,7 @@ const Tasks = () => {
           </div>
         );
       default:
-        return <p className="text-muted">Failed to load tasks.</p>; //Simplified.  The Failure component is not used
+        return <p className="text-muted">Failed to load tasks.</p>;
     }
   };
 

@@ -13,6 +13,7 @@ const apiStatusConstants = {
 };
 
 const Projects = () => {
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const [projects, setProjects] = useState([]);
   const [expandedProjectId, setExpandedProjectId] = useState(null);
   const [tasks, setTasks] = useState([]);
@@ -24,9 +25,11 @@ const Projects = () => {
   useEffect(() => {
     if (!token) return navigate('/');
     const fetchProjects = async () => {
+
       setProjectApiStatus(apiStatusConstants.IN_PROGRESS);
       try {
-        const res = await axios.get('http://localhost:5000/api/projects', {
+        const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+        const res = await axios.get(`${API_BASE_URL}/api/projects`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setProjects(res.data.projects);
@@ -41,7 +44,7 @@ const Projects = () => {
   const fetchTasks = async (projectId) => {
     setTaskLoading(true);
     try {
-      const res = await axios.get(`http://localhost:5000/api/tasks/project/${projectId}`, {
+      const res = await axios.get(`${API_BASE_URL}/api/tasks/project/${projectId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTasks(res.data.tasks);
@@ -64,7 +67,7 @@ const Projects = () => {
 
   const handleDeleteTask = async (taskId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/tasks/${taskId}`, {
+      await axios.delete(`${API_BASE_URL}/api/tasks/${taskId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTasks(tasks.filter((t) => t._id !== taskId));
@@ -78,7 +81,7 @@ const Projects = () => {
     const confirmDelete = window.confirm('Are you sure you want to delete this project and all its tasks?');
     if (!confirmDelete) return;
     try {
-      await axios.delete(`http://localhost:5000/api/projects/${projectId}`, {
+      await axios.delete(`${API_BASE_URL}/api/projects/${projectId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProjects(projects.filter((p) => p._id !== projectId));
@@ -158,7 +161,7 @@ const Projects = () => {
       {renderProjectsView()}
 
       <div className="text-center mt-5">
-        <button className="btn btn-success px-4 py-2" onClick={() => navigate('/create-project')}>
+        <button className="btn btn-success px-4 py-2" onClick={() => navigate("/create-project")}>
           <FaPlus className="me-2" /> Create Project
         </button>
       </div>

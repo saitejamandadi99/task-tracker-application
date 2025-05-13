@@ -11,6 +11,7 @@ const apiStatusConstants = {
 };
 
 const TaskCard = ({ task, onDelete, onUpdate }) => {
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const [details, setDetails] = useState(null);
   const [showEdit, setShowEdit] = useState(false);
   const [editApiStatus, setEditApiStatus] = useState(apiStatusConstants.INITIAL);
@@ -27,7 +28,7 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
     }
     setViewApiStatus(apiStatusConstants.IN_PROGRESS);
     try {
-      const res = await axios.get(`http://localhost:5000/api/tasks/${task._id}`, {
+      const res = await axios.get(`${API_BASE_URL}/api/tasks/${task._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setDetails(res.data.task);
@@ -47,7 +48,7 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
       status: e.target.status.value,
     };
     try {
-      await axios.put(`http://localhost:5000/api/tasks/${task._id}`, updatedTask, {
+      await axios.put(`${API_BASE_URL}/api/tasks/${task._id}`, updatedTask, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEditApiStatus(apiStatusConstants.SUCCESS);
