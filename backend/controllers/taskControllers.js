@@ -1,6 +1,6 @@
 const Task = require('../models/task');
 const Project = require('../models/project');
-const User = require('../models/user');
+const User = require('../models/User');
 
 const createTask = async (req, res) => {
     try {
