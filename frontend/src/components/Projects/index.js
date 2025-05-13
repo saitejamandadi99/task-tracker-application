@@ -1,7 +1,9 @@
+// src/components/Projects.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaTrash } from 'react-icons/fa';
+import TaskCard from '../TaskCard';
 import './index.css';
 
 const Projects = () => {
@@ -9,53 +11,53 @@ const Projects = () => {
   const [expandedProjectId, setExpandedProjectId] = useState(null);
   const [tasks, setTasks] = useState([]);
   const navigate = useNavigate();
-
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    if (!token) {
-      navigate('/'); // Redirect to login if no token
-      return;
-    }
-
-    const fetchProjects = async () => {
-      try {
-        const res = await axios.get('http://localhost:5000/api/projects', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setProjects(res.data.projects);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchProjects();
+    if (!token) return navigate('/');
+    axios
+      .get('http://localhost:5000/api/projects', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setProjects(res.data.projects))
+      .catch((err) => console.error(err));
   }, [navigate, token]);
 
-  const handleCreate = () => {
-    navigate('/create-project'); // Navigate to create project page
+  const fetchTasks = async (projectId) => {
+    const res = await axios.get(`http://localhost:5000/api/tasks/project/${projectId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setTasks(res.data.tasks);
   };
 
-  const handleAddTask = (projectId, e) => {
-    e.stopPropagation(); // Prevent triggering project expand
-    navigate(`/create-task/${projectId}`); // Navigate to task creation page
-  };
-
-  const handleProjectClick = async (projectId) => {
+  const handleProjectClick = (projectId) => {
     if (expandedProjectId === projectId) {
       setExpandedProjectId(null);
-      return;
+    } else {
+      setExpandedProjectId(projectId);
+      fetchTasks(projectId);
     }
+  };
 
-    setExpandedProjectId(projectId);
+  const handleDeleteTask = async (taskId) => {
+    await axios.delete(`http://localhost:5000/api/tasks/${taskId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setTasks(tasks.filter((t) => t._id !== taskId));
+  };
+
+  const handleDeleteProject = async (e, projectId) => {
+    e.stopPropagation();
+    const confirmDelete = window.confirm('Are you sure you want to delete this project and all its tasks?');
+    if (!confirmDelete) return;
+
     try {
-        const res = await axios.get(`http://localhost:5000/api/tasks/project/${projectId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          
-      setTasks(res.data.tasks);
-    } catch (err) {
-      console.error('Failed to fetch tasks:', err);
+      await axios.delete(`http://localhost:5000/api/projects/${projectId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProjects(projects.filter((p) => p._id !== projectId));
+    } catch (error) {
+      console.error('Failed to delete project:', error);
     }
   };
 
@@ -65,33 +67,42 @@ const Projects = () => {
 
       <div className="project-grid">
         {projects.map((project) => (
-          <div
-            key={project._id}
-            className="project-card"
-            onClick={() => handleProjectClick(project._id)}
-          >
-            <h4>{project.title}</h4>
-            <p>Status: {project.status}</p>
-            <p>Due: {project.dueDate ? new Date(project.dueDate).toLocaleDateString() : 'N/A'}</p>
+          <div className="project-card" key={project._id} onClick={() => handleProjectClick(project._id)}>
+            <div className="project-header d-flex justify-content-between align-items-center">
+              <h5 className="fw-bold mb-0">{project.title}</h5>
+              <FaTrash
+                className="text-danger delete-icon"
+                onClick={(e) => handleDeleteProject(e, project._id)}
+                title="Delete Project"
+              />
+            </div>
+
+            <p className="mb-1"><strong>Status:</strong> {project.status}</p>
+            <p className="mb-2"><strong>Due:</strong> {project.dueDate ? new Date(project.dueDate).toLocaleDateString() : 'N/A'}</p>
 
             {expandedProjectId === project._id && (
-              <div className="task-list mt-3">
-                <h6>Tasks:</h6>
-                {tasks.length > 0 ? (
+              <div className="task-list">
+                <h6 className="fw-semibold">Tasks:</h6>
+                {tasks.length ? (
                   tasks.map((task) => (
-                    <div key={task._id} className="task-item">
-                      <strong>{task.title}</strong> - {task.status}
-                    </div>
+                    <TaskCard
+                      key={task._id}
+                      task={task}
+                      onDelete={handleDeleteTask}
+                      onUpdate={() => fetchTasks(project._id)}
+                    />
                   ))
                 ) : (
-                  <p>No tasks found.</p>
+                  <p className="text-muted">No tasks found.</p>
                 )}
-
                 <button
-                  className="btn btn-sm btn-outline-primary mt-2"
-                  onClick={(e) => handleAddTask(project._id, e)}
+                  className="btn btn-outline-primary btn-sm mt-3"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/create-task/${project._id}`);
+                  }}
                 >
-                  <FaPlus /> Add Task
+                  <FaPlus className="me-1" /> Add Task
                 </button>
               </div>
             )}
@@ -99,9 +110,11 @@ const Projects = () => {
         ))}
       </div>
 
-      <button className="create-btn" onClick={handleCreate}>
-        <FaPlus /> Create Project
-      </button>
+      <div className="text-center mt-5">
+        <button className="btn btn-success px-4 py-2" onClick={() => navigate('/create-project')}>
+          <FaPlus className="me-2" /> Create Project
+        </button>
+      </div>
     </div>
   );
 };

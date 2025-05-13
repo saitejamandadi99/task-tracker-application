@@ -1,5 +1,5 @@
 const Project = require('../models/project');
-
+const Task = require('../models/task');
 const createProject = async (req, res) =>{
     console.log('createProject → req.user:', req.user);
     try {
@@ -46,4 +46,27 @@ const getAllProjects = async (req, res) =>{
     }
 }
 
-module.exports = {createProject, getAllProjects};
+const deleteProjectById = async (req, res) => {
+    
+    const projectId = req.params.projectId;
+
+    try {
+        // Check if the project exists and belongs to the user
+        const project = await Project.findById(projectId);
+        if (!project) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+        // Delete all tasks related to the project
+        await Task.deleteMany({ project: projectId });
+
+        // Delete the project itself
+        await Project.findByIdAndDelete(projectId);
+
+        return res.status(200).json({ message: 'Project and associated tasks deleted successfully' });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+
+module.exports = {createProject, getAllProjects, deleteProjectById};

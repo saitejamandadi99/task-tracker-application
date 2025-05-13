@@ -99,14 +99,22 @@ const getTaskById = async (req, res) => {
 
 // Update a task by ID
 const updateTaskById = async (req, res) => {
-    const userId = req.user._id;
+    
     const taskId = req.params.taskId;
     const { title, description, status, completedAt } = req.body;
 
     try {
-        const task = await Task.findOne({ _id: taskId, user: userId }); // Corrected this line
+        const task = await Task.findById(taskId); // Corrected this line
         if (!task) {
             return res.status(404).json({ message: 'Task not found' });
+        }
+
+        let completedAt = task.completedAt;
+
+        if (status === 'Completed' && !task.completedAt) {
+            completedAt = new Date();
+        } else if (status !== 'completed') {
+            completedAt = null;
         }
 
         // Update the task
@@ -116,7 +124,7 @@ const updateTaskById = async (req, res) => {
                 title: title || task.title,
                 description: description || task.description,
                 status: status || task.status,
-                completedAt: completedAt || task.completedAt
+                completedAt
             },
             { new: true }
         );
@@ -140,13 +148,14 @@ const updateTaskById = async (req, res) => {
 
 // Delete a task by ID
 const deleteTaskById = async (req, res) => {
-    const userId = req.user._id;
     const taskId = req.params.taskId;
+    console.log(taskId)
 
     try {
-        const task = await Task.findOne({ _id: taskId, user: userId }); // Corrected this line
+        const task = await Task.findById(taskId); // Corrected this line
+        console.log('DB', task)
         if (!task) {
-            return res.status(404).json({ message: 'Task not found' });
+            return res.status(404).json({ message: 'Task not found', id:taskId });
         }
 
         await Task.findByIdAndDelete(taskId);

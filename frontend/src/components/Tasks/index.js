@@ -1,3 +1,4 @@
+// frontend/src/components/Tasks.js
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import TaskCard from '../TaskCard';
@@ -28,9 +29,10 @@ const Tasks = () => {
     fetchTasks();
   }, [fetchTasks]);
 
-  const handleDelete = async (taskId) => {
+  const handleDeleteTask = async (taskId) => { // Changed function name to handleDeleteTask
     const token = localStorage.getItem('token');
     try {
+      console.log(taskId)
       await axios.delete(`http://localhost:5000/api/tasks/${taskId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -60,7 +62,7 @@ const Tasks = () => {
           <div className="col-md-4 mb-3" key={task._id}>
             <TaskCard
               task={task}
-              onDelete={handleDelete}
+              onDelete={handleDeleteTask} // Corrected prop name to handleDelete
               onUpdate={fetchTasks}
             />
           </div>

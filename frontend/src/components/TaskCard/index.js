@@ -1,118 +1,136 @@
+// src/components/TaskCard.js
 import React, { useState } from 'react';
 import axios from 'axios';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './index.css';
+import { FaEye, FaEdit, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
+import { useMediaQuery } from 'react-responsive';
 
 const TaskCard = ({ task, onDelete, onUpdate }) => {
   const [details, setDetails] = useState(null);
-  const [message, setMessage] = useState('');
   const [showEdit, setShowEdit] = useState(false);
-  const [formData, setFormData] = useState({
-    title: task.title,
-    description: task.description,
-    status: task.status,
-  });
-
+  const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
   const token = localStorage.getItem('token');
 
-  // View Button Handler
-  const handleView = async () => {
-    console.log('View button clicked');
+  const iconSize = isMobile ? 16 : 20;
+
+  const handleView = async (e) => {
+    e.stopPropagation();
+    if (details) {
+      setDetails(null);
+      return;
+    }
     try {
       const res = await axios.get(`http://localhost:5000/api/tasks/${task._id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` }
       });
       setDetails(res.data.task);
-    } catch (error) {
-      setMessage(error.response?.data?.message || 'Failed to fetch details');
+    } catch (err) {
+      console.error('Error fetching task details:', err);
     }
   };
 
-  // Delete Button Handler
-  const handleDelete = () => {
-    console.log('Delete button clicked');
-    onDelete(task._id);
-  };
-
-  // Edit Button Handler
-  const handleEdit = () => {
-    console.log('Edit button clicked');
-    setShowEdit(true);
-  };
-
-  // Submit edited data
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    const updatedTask = {
+      title: e.target.title.value,
+      description: e.target.description.value,
+      status: e.target.status.value,
+    };
     try {
-      await axios.put(
-        `http://localhost:5000/api/tasks/${task._id}`,
-        formData,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await axios.put(`http://localhost:5000/api/tasks/${task._id}`, updatedTask, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setShowEdit(false);
-      onUpdate(); // Refresh the parent list
+      setDetails(null);
+      onUpdate();
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Update failed');
+      console.error('Error updating task:', err);
     }
+  };
+
+  const toggleEdit = (e) => {
+    e.stopPropagation();
+    setShowEdit(prev => !prev);
   };
 
   return (
-    <div className="card shadow-sm p-3 h-100">
-      <h5>{task.title}</h5>
-      <p>Status: <strong>{task.status}</strong></p>
+    <div className="card mb-3" onClick={e => e.stopPropagation()}>
+      <div className="card-body">
+        <h5 className="card-title">{task.title}</h5>
+        <p className="card-text"><strong>Status:</strong> {task.status}</p>
 
-      <div className="d-flex justify-content-between mt-2">
-        <button className="btn btn-outline-primary btn-sm" onClick={handleView}>
-          View
-        </button>
-        <button className="btn btn-outline-secondary btn-sm" onClick={handleEdit}>
-          Edit
-        </button>
-        <button className="btn btn-outline-danger btn-sm" onClick={handleDelete}>
-          Delete
-        </button>
-      </div>
-
-      {details && (
-        <div className="mt-3 border-top pt-2">
-          <h6>Details:</h6>
-          <p>{details.description}</p>
-          <p>Created: {new Date(details.createdAt).toLocaleDateString()}</p>
-          <p>Completed: {details.completedAt ? new Date(details.completedAt).toLocaleDateString() : 'N/A'}</p>
+        <div className="d-flex justify-content-start align-items-center gap-3 mb-2 flex-wrap">
+          <FaEye
+            size={iconSize}
+            className="text-primary"
+            onClick={handleView}
+            style={{ cursor: 'pointer' }}
+            title={details ? 'Hide Details' : 'View Details'}
+          />
+          <FaEdit
+            size={iconSize}
+            className="text-secondary"
+            onClick={toggleEdit}
+            style={{ cursor: 'pointer' }}
+            title={showEdit ? 'Cancel Edit' : 'Edit Task'}
+          />
+          <FaTrash
+            size={iconSize}
+            className="text-danger"
+            onClick={() => onDelete(task._id)}
+            style={{ cursor: 'pointer' }}
+            title="Delete Task"
+          />
         </div>
-      )}
 
-      {showEdit && (
-        <form className="mt-3" onSubmit={handleEditSubmit}>
-          <input
-            className="form-control mb-2"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            placeholder="Title"
-          />
-          <textarea
-            className="form-control mb-2"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Description"
-          />
-          <select
-            className="form-select mb-2"
-            value={formData.status}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-          >
-            <option value="To Do">To Do</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-          </select>
-          <div className="d-flex justify-content-end">
-            <button className="btn btn-sm btn-success me-2" type="submit">Save</button>
-            <button className="btn btn-sm btn-secondary" onClick={() => setShowEdit(false)}>Cancel</button>
+        {details && (
+          <div className="mt-3 border-top pt-2">
+            <p><strong>Description:</strong> {details.description || 'N/A'}</p>
+            <p><strong>Created:</strong> {new Date(details.createdAt).toLocaleDateString()}</p>
+            <p><strong>Completed:</strong> {details.completedAt ? new Date(details.completedAt).toLocaleDateString() : 'N/A'}</p>
           </div>
-        </form>
-      )}
+        )}
 
-      {message && <div className="alert alert-warning mt-2">{message}</div>}
+          {showEdit && (
+            <form className="mt-3" onSubmit={handleEditSubmit}>
+              <div className="mb-2">
+                <label className="form-label">Title</label>
+                <input type="text" name="title" defaultValue={task.title} className="form-control" required />
+              </div>
+              <div className="mb-2">
+                <label className="form-label">Description</label>
+                <textarea name="description" defaultValue={task.description} className="form-control" rows="3" />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Status</label>
+                <select name="status" defaultValue={task.status} className="form-select">
+                  <option value="To Do">To Do</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+              <div className="d-flex justify-content-start gap-3">
+                <button
+                  type="submit"
+                  className="btn btn-success btn-sm d-flex align-items-center justify-content-center"
+                  title="Save"
+                  style={{ width: '36px', height: '36px' }}
+                >
+                  <FaSave size={iconSize} />
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
+                  onClick={toggleEdit}
+                  title="Cancel"
+                  style={{ width: '36px', height: '36px' }}
+                >
+                  <FaTimes size={iconSize} />
+                </button>
+              </div>
+            </form>
+          )}
+
+      </div>
     </div>
   );
 };
