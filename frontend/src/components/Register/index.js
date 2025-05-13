@@ -2,8 +2,17 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaUserPlus, FaCheckCircle } from 'react-icons/fa';
+import Loader from '../Loader';
+import Failure from '../Failure';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
+
+const apiStatusConstants = {
+  INITIAL: 'INITIAL',
+  IN_PROGRESS: 'IN_PROGRESS',
+  SUCCESS: 'SUCCESS',
+  FAILURE: 'FAILURE',
+};
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +23,7 @@ const Register = () => {
   });
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState(false);
+  const [apiStatus, setApiStatus] = useState(apiStatusConstants.INITIAL);
   const navigate = useNavigate();
 
   const handleChange = (e) =>
@@ -21,21 +31,85 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setApiStatus(apiStatusConstants.IN_PROGRESS);
+
     try {
-      const res = await axios.post(
-        'http://localhost:5000/api/auth/register',
-        formData
-      );
+      const res = await axios.post('http://localhost:5000/api/auth/register', formData);
       setMessage(res.data.message);
       setSuccess(true);
+      setApiStatus(apiStatusConstants.SUCCESS);
 
-      // Delay then redirect to login
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
+      setTimeout(() => navigate('/'), 2000);
     } catch (error) {
       setSuccess(false);
       setMessage(error.response?.data?.message || 'Registration failed');
+      setApiStatus(apiStatusConstants.FAILURE);
+    }
+  };
+
+  const renderSwitchView = () => {
+    switch (apiStatus) {
+      case apiStatusConstants.IN_PROGRESS:
+        return <Loader />;
+      case apiStatusConstants.FAILURE:
+        return <Failure />;
+      default:
+        return (
+          <>
+            <form onSubmit={handleSubmit}>
+              <input
+                type="text"
+                className="form-control mb-3"
+                name="name"
+                placeholder="Name"
+                required
+                onChange={handleChange}
+              />
+              <input
+                type="email"
+                className="form-control mb-3"
+                name="email"
+                placeholder="Email"
+                required
+                onChange={handleChange}
+              />
+              <input
+                type="password"
+                className="form-control mb-3"
+                name="password"
+                placeholder="Password"
+                required
+                onChange={handleChange}
+              />
+              <input
+                type="text"
+                className="form-control mb-3"
+                name="country"
+                placeholder="Country"
+                required
+                onChange={handleChange}
+              />
+              <button className="btn btn-primary w-100" type="submit">
+                Register
+              </button>
+            </form>
+
+            {message && (
+              <div
+                className={`alert mt-3 ${
+                  success ? 'alert-success' : 'alert-danger'
+                } d-flex align-items-center gap-2`}
+              >
+                {success && <FaCheckCircle />} {message}
+              </div>
+            )}
+
+            <div className="text-center mt-3">
+              <span>Already have an account? </span>
+              <Link to="/">Login here</Link>
+            </div>
+          </>
+        );
     }
   };
 
@@ -45,58 +119,7 @@ const Register = () => {
         <h2 className="register-title text-center">
           <FaUserPlus className="mb-1" /> Register
         </h2>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            className="form-control mb-3"
-            name="name"
-            placeholder="Name"
-            required
-            onChange={handleChange}
-          />
-          <input
-            type="email"
-            className="form-control mb-3"
-            name="email"
-            placeholder="Email"
-            required
-            onChange={handleChange}
-          />
-          <input
-            type="password"
-            className="form-control mb-3"
-            name="password"
-            placeholder="Password"
-            required
-            onChange={handleChange}
-          />
-          <input
-            type="text"
-            className="form-control mb-3"
-            name="country"
-            placeholder="Country"
-            required
-            onChange={handleChange}
-          />
-          <button className="btn btn-primary w-100" type="submit">
-            Register
-          </button>
-        </form>
-
-        {message && (
-          <div
-            className={`alert mt-3 ${
-              success ? 'alert-success' : 'alert-danger'
-            } d-flex align-items-center gap-2`}
-          >
-            {success && <FaCheckCircle />} {message}
-          </div>
-        )}
-
-        <div className="text-center mt-3">
-          <span>Already have an account? </span>
-          <Link to="/">Login here</Link>
-        </div>
+        {renderSwitchView()}
       </div>
     </div>
   );

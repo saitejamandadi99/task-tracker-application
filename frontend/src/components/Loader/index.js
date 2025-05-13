@@ -1,6 +1,6 @@
 // src/components/Loader.js
 import React from 'react';
-import './Loader.css'; // CSS-based spinner
+import './index.css'; 
 
 const Loader = () => (
   <div className="spinner-container">

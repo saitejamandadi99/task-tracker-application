@@ -1,15 +1,24 @@
-// src/components/TaskCard.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { FaEye, FaEdit, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
 import { useMediaQuery } from 'react-responsive';
+import Loader from '../Loader';      
+import Failure from '../Failure';    
+
+const apiStatusConstants = {
+  INITIAL: 'INITIAL',
+  IN_PROGRESS: 'IN_PROGRESS',
+  SUCCESS: 'SUCCESS',
+  FAILURE: 'FAILURE',
+};
 
 const TaskCard = ({ task, onDelete, onUpdate }) => {
   const [details, setDetails] = useState(null);
   const [showEdit, setShowEdit] = useState(false);
+  const [editApiStatus, setEditApiStatus] = useState(apiStatusConstants.INITIAL);
+  const [viewApiStatus, setViewApiStatus] = useState(apiStatusConstants.INITIAL); // Added for viewing details
   const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
   const token = localStorage.getItem('token');
-
   const iconSize = isMobile ? 16 : 20;
 
   const handleView = async (e) => {
@@ -18,18 +27,22 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
       setDetails(null);
       return;
     }
+    setViewApiStatus(apiStatusConstants.IN_PROGRESS); // Set status for view
     try {
       const res = await axios.get(`http://localhost:5000/api/tasks/${task._id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDetails(res.data.task);
+      setViewApiStatus(apiStatusConstants.SUCCESS);
     } catch (err) {
       console.error('Error fetching task details:', err);
+      setViewApiStatus(apiStatusConstants.FAILURE);
     }
   };
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    setEditApiStatus(apiStatusConstants.IN_PROGRESS);
     const updatedTask = {
       title: e.target.title.value,
       description: e.target.description.value,
@@ -39,17 +52,90 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
       await axios.put(`http://localhost:5000/api/tasks/${task._id}`, updatedTask, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      setEditApiStatus(apiStatusConstants.SUCCESS);
       setShowEdit(false);
       setDetails(null);
       onUpdate();
     } catch (err) {
       console.error('Error updating task:', err);
+      setEditApiStatus(apiStatusConstants.FAILURE);
     }
   };
 
   const toggleEdit = (e) => {
     e.stopPropagation();
     setShowEdit(prev => !prev);
+    setEditApiStatus(apiStatusConstants.INITIAL); // Reset edit status
+  };
+
+  const renderDetailsView = () => {
+    switch (viewApiStatus) {
+      case apiStatusConstants.IN_PROGRESS:
+        return <Loader />;
+      case apiStatusConstants.FAILURE:
+        return <Failure />;
+      case apiStatusConstants.SUCCESS:
+        return (
+          <div className="mt-3 border-top pt-2">
+            <p><strong>Description:</strong> {details.description || 'N/A'}</p>
+            <p><strong>Created:</strong> {new Date(details.createdAt).toLocaleDateString()}</p>
+            <p><strong>Completed:</strong> {details.completedAt ? new Date(details.completedAt).toLocaleDateString() : 'N/A'}</p>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+    const renderEditView = () => {
+    switch (editApiStatus) {
+      case apiStatusConstants.IN_PROGRESS:
+        return <Loader />;
+      case apiStatusConstants.FAILURE:
+        return <Failure />;
+      case apiStatusConstants.SUCCESS:
+        return null; // No need to display anything, form is already displayed
+      default:
+        return (
+          <form className="mt-3" onSubmit={handleEditSubmit}>
+            <div className="mb-2">
+              <label className="form-label">Title</label>
+              <input type="text" name="title" defaultValue={task.title} className="form-control" required />
+            </div>
+            <div className="mb-2">
+              <label className="form-label">Description</label>
+              <textarea name="description" defaultValue={task.description} className="form-control" rows="3" />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">Status</label>
+              <select name="status" defaultValue={task.status} className="form-select">
+                <option value="To Do">To Do</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+            <div className="d-flex justify-content-start gap-3">
+              <button
+                type="submit"
+                className="btn btn-success btn-sm d-flex align-items-center justify-content-center"
+                title="Save"
+                style={{ width: '36px', height: '36px' }}
+              >
+                <FaSave size={iconSize} />
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
+                onClick={toggleEdit}
+                title="Cancel"
+                style={{ width: '36px', height: '36px' }}
+              >
+                <FaTimes size={iconSize} />
+              </button>
+            </div>
+          </form>
+        );
+    }
   };
 
   return (
@@ -82,53 +168,8 @@ const TaskCard = ({ task, onDelete, onUpdate }) => {
           />
         </div>
 
-        {details && (
-          <div className="mt-3 border-top pt-2">
-            <p><strong>Description:</strong> {details.description || 'N/A'}</p>
-            <p><strong>Created:</strong> {new Date(details.createdAt).toLocaleDateString()}</p>
-            <p><strong>Completed:</strong> {details.completedAt ? new Date(details.completedAt).toLocaleDateString() : 'N/A'}</p>
-          </div>
-        )}
-
-          {showEdit && (
-            <form className="mt-3" onSubmit={handleEditSubmit}>
-              <div className="mb-2">
-                <label className="form-label">Title</label>
-                <input type="text" name="title" defaultValue={task.title} className="form-control" required />
-              </div>
-              <div className="mb-2">
-                <label className="form-label">Description</label>
-                <textarea name="description" defaultValue={task.description} className="form-control" rows="3" />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Status</label>
-                <select name="status" defaultValue={task.status} className="form-select">
-                  <option value="To Do">To Do</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Completed">Completed</option>
-                </select>
-              </div>
-              <div className="d-flex justify-content-start gap-3">
-                <button
-                  type="submit"
-                  className="btn btn-success btn-sm d-flex align-items-center justify-content-center"
-                  title="Save"
-                  style={{ width: '36px', height: '36px' }}
-                >
-                  <FaSave size={iconSize} />
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
-                  onClick={toggleEdit}
-                  title="Cancel"
-                  style={{ width: '36px', height: '36px' }}
-                >
-                  <FaTimes size={iconSize} />
-                </button>
-              </div>
-            </form>
-          )}
+        {renderDetailsView()}
+        {showEdit && renderEditView()}
 
       </div>
     </div>

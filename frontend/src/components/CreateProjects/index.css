@@ -37,3 +37,20 @@
     text-align: center;
   }
   
+  .create-project-btn {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px 0;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0, 128, 0, 0.2);
+    margin: 0 auto;
+    display: block;
+    transition: background-color 0.3s ease;
+  }
+  
+  .create-project-btn:hover {
+    background-color: #218838;
+  }
+  

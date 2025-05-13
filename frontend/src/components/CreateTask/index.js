@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Loader from '../Loader';
+import Failure from '../Failure';
+
+const apiStatusConstants = {
+  INITIAL: 'INITIAL',
+  IN_PROGRESS: 'IN_PROGRESS',
+  SUCCESS: 'SUCCESS',
+  FAILURE: 'FAILURE',
+};
 
 const CreateTask = () => {
   const { projectId } = useParams();
@@ -10,8 +19,10 @@ const CreateTask = () => {
   const [task, setTask] = useState({
     title: '',
     description: '',
-    status: 'To Do'
+    status: 'To Do',
   });
+
+  const [apiStatus, setApiStatus] = useState(apiStatusConstants.INITIAL);
 
   const handleChange = (e) => {
     setTask({ ...task, [e.target.name]: e.target.value });
@@ -19,6 +30,7 @@ const CreateTask = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setApiStatus(apiStatusConstants.IN_PROGRESS);
 
     try {
       await axios.post(
@@ -26,53 +38,68 @@ const CreateTask = () => {
         { ...task, projectId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      setApiStatus(apiStatusConstants.SUCCESS);
       navigate('/projects');
     } catch (error) {
+      setApiStatus(apiStatusConstants.FAILURE);
       console.error('Error creating task:', error.response?.data?.message || error.message);
+    }
+  };
+
+  const renderSwitchView = () => {
+    switch (apiStatus) {
+      case apiStatusConstants.IN_PROGRESS:
+        return <Loader />;
+      case apiStatusConstants.FAILURE:
+        return <Failure />;
+      default:
+        return (
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Title</label>
+              <input
+                name="title"
+                className="form-control"
+                value={task.title}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group mt-2">
+              <label>Description</label>
+              <textarea
+                name="description"
+                className="form-control"
+                value={task.description}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-group mt-2">
+              <label>Status</label>
+              <select
+                name="status"
+                className="form-control"
+                value={task.status}
+                onChange={handleChange}
+              >
+                <option value="To Do">To Do</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="On Hold">On Hold</option>
+              </select>
+            </div>
+            <button className="btn btn-success mt-3" type="submit">
+              Create Task
+            </button>
+          </form>
+        );
     }
   };
 
   return (
     <div className="container mt-4">
       <h3>Create Task</h3>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Title</label>
-          <input
-            name="title"
-            className="form-control"
-            value={task.title}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group mt-2">
-          <label>Description</label>
-          <textarea
-            name="description"
-            className="form-control"
-            value={task.description}
-            onChange={handleChange}
-          />
-        </div>
-        <div className="form-group mt-2">
-          <label>Status</label>
-          <select
-            name="status"
-            className="form-control"
-            value={task.status}
-            onChange={handleChange}
-          >
-            <option value="To Do">To Do</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-            <option value="On Hold">On Hold</option>
-          </select>
-        </div>
-        <button className="btn btn-success mt-3" type="submit">
-          Create Task
-        </button>
-      </form>
+      {renderSwitchView()}
     </div>
   );
 };

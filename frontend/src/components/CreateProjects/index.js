@@ -4,6 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { FaPlusCircle } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
+import Loader from '../Loader'; // assuming Loader is in src/components/Loader.js
+import Failure from '../Failure'; // assuming Failure is in src/components/Failure.js
+
+const apiStatusConstants = {
+  INITIAL: 'INITIAL',
+  IN_PROGRESS: 'IN_PROGRESS',
+  SUCCESS: 'SUCCESS',
+  FAILURE: 'FAILURE',
+};
 
 const CreateProject = () => {
   const [formData, setFormData] = useState({
@@ -12,7 +21,9 @@ const CreateProject = () => {
     dueDate: '',
     status: 'To Do',
   });
+
   const [message, setMessage] = useState('');
+  const [apiStatus, setApiStatus] = useState(apiStatusConstants.INITIAL);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -22,6 +33,7 @@ const CreateProject = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
+    setApiStatus(apiStatusConstants.IN_PROGRESS);
 
     try {
       const res = await axios.post(
@@ -30,59 +42,74 @@ const CreateProject = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setMessage(res.data.message);
-      setTimeout(() => navigate('/projects'), 1500); // Redirect to projects after creation
+      setApiStatus(apiStatusConstants.SUCCESS);
+      setTimeout(() => navigate('/projects'), 1500);
     } catch (error) {
       setMessage(error.response?.data?.message || 'Failed to create project');
+      setApiStatus(apiStatusConstants.FAILURE);
     }
   };
 
-  return (
-    <div className="container mt-5">
-      <div className="card shadow p-4">
-        <h2 className="text-center mb-4">
-          <FaPlusCircle className="mb-1" /> Create Project
-        </h2>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="title"
-            className="form-control mb-3"
-            placeholder="Title"
-            required
-            onChange={handleChange}
-          />
-          <textarea
-            name="description"
-            className="form-control mb-3"
-            placeholder="Description"
-            rows="3"
-            onChange={handleChange}
-          ></textarea>
-          <input
-            type="date"
-            name="dueDate"
-            className="form-control mb-3"
-            onChange={handleChange}
-          />
-          <select
-            name="status"
-            className="form-control mb-3"
-            onChange={handleChange}
-            defaultValue="To Do"
-          >
-            <option>To Do</option>
-            <option>In Progress</option>
-            <option>Completed</option>
-            <option>On Hold</option>
-          </select>
-          <button className="btn btn-success w-100" type="submit">
-            Create Project
-          </button>
-        </form>
-        {message && <div className="alert alert-info mt-3">{message}</div>}
-      </div>
-    </div>
-  );
+  const renderContent = () => {
+    switch (apiStatus) {
+      case apiStatusConstants.IN_PROGRESS:
+        return <Loader />;
+      case apiStatusConstants.FAILURE:
+        return <Failure onRetry={() => setApiStatus(apiStatusConstants.INITIAL)} />;
+      default:
+        return (
+          <div className="card shadow p-4">
+            <h2 className="text-center mb-4">
+              <FaPlusCircle className="mb-1" /> Create Project
+            </h2>
+            <form onSubmit={handleSubmit}>
+              <input
+                type="text"
+                name="title"
+                className="form-control mb-3"
+                placeholder="Title"
+                required
+                onChange={handleChange}
+              />
+              <textarea
+                name="description"
+                className="form-control mb-3"
+                placeholder="Description"
+                rows="3"
+                onChange={handleChange}
+              ></textarea>
+              <input
+                type="date"
+                name="dueDate"
+                className="form-control mb-3"
+                onChange={handleChange}
+              />
+              <select
+                name="status"
+                className="form-control mb-3"
+                onChange={handleChange}
+                defaultValue="To Do"
+              >
+                <option>To Do</option>
+                <option>In Progress</option>
+                <option>Completed</option>
+                <option>On Hold</option>
+              </select>
+              <button
+                type="submit"
+                className="btn btn-success create-project-btn w-100"
+              >
+                Create Project
+              </button>
+
+            </form>
+            {message && <div className="alert alert-info mt-3">{message}</div>}
+          </div>
+        );
+    }
+  };
+
+  return <div className="container mt-5">{renderContent()}</div>;
 };
 
 export default CreateProject;
