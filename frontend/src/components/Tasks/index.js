@@ -5,7 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FaPlus } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
-import Loader from '../Loader'; // Assuming you have a Loader component
+import Loader from '../Loader'; 
 // import Failure from '../Failure'; // Assuming you have a Failure component -  Not used
 
 const apiStatusConstants = {
