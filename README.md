@@ -59,8 +59,4 @@ cd frontend
 npm start
 ```
 
-Customization:
-Make sure to replace https://github.com/your-username/mern-task-tracker.git with the actual GitHub URL of your repository.
-Add any additional details specific to your project.
-
 
