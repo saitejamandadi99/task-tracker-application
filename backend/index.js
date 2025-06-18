@@ -11,7 +11,7 @@ const MONGO_URI = process.env.MONGO_URI;
 
 app.use(express.json());
 app.use(cors({
-    origin: 'https://task-tracker-application-snowy.vercel.app',  
+    origin: 'https://task-tracker-application-frontend-n7kj.onrender.com',  
     credentials: true,
   }));
   
