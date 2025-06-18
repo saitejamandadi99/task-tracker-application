@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaSignInAlt } from 'react-icons/fa';
 import Loader from '../Loader';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 
 const apiStatusConstants = {
@@ -37,11 +36,11 @@ const Login = () => {
         navigate('/projects');
       } else {
         setMessage('Token not received. Login failed.');
-        setApiStatus(apiStatusConstants.INITIAL); // Changed to INITIAL
+        setApiStatus(apiStatusConstants.INITIAL);
       }
     } catch (error) {
       setMessage(error.response?.data?.message || 'Login failed');
-      setApiStatus(apiStatusConstants.INITIAL); // Changed to INITIAL
+      setApiStatus(apiStatusConstants.INITIAL);
     }
   };
 
@@ -54,31 +53,31 @@ const Login = () => {
       default:
         return (
           <>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="login-form">
               <input
                 type="email"
-                className="form-control mb-3"
                 name="email"
                 placeholder="Email"
                 required
                 onChange={handleChange}
+                className="login-input"
               />
               <input
                 type="password"
-                className="form-control mb-3"
                 name="password"
                 placeholder="Password"
                 required
                 onChange={handleChange}
+                className="login-input"
               />
-              <button className="btn btn-success w-100" type="submit">
+              <button className="login-button" type="submit">
                 Login
               </button>
             </form>
-            {message && <div className="alert alert-info mt-3">{message}</div>}
-            <div className="text-center mt-3">
+            {message && <div className="login-message">{message}</div>}
+            <div className="login-footer">
               <span>Don't have an account? </span>
-              <Link to="/register">Register here</Link>
+              <Link to="/register" className="login-link">Register here</Link>
             </div>
           </>
         );
@@ -87,9 +86,9 @@ const Login = () => {
 
   return (
     <div className="login-wrapper">
-      <div className="login-card shadow">
-        <h2 className="login-title text-center">
-          <FaSignInAlt className="mb-1" /> Login
+      <div className="login-card">
+        <h2 className="login-title">
+          <FaSignInAlt className="login-icon" /> Login
         </h2>
         {renderSwitchView()}
       </div>
